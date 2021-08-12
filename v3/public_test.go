@@ -4,65 +4,36 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
-	"reflect"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestClient_Ticker(t *testing.T) {
-	type args struct {
-		ctx   context.Context
-		base  string
-		quote string
+	assert := assert.New(t)
+	client := New()
+	ticker, err := client.Ticker(context.Background(), "btc", "brl")
+	if err != nil {
+		assert.Failf("test failed", "error response: %+v", err)
+		return
 	}
-	tests := []struct {
-		name    string
-		args    args
-		want    Ticker
-		wantErr bool
-	}{
-		{
-			"Simple test",
-			args{
-				base:  "BTC",
-				quote: "BRL",
-			},
-			Ticker{
-				High: "",
-				Low:  "",
-				Vol:  "",
-				Last: "",
-				Buy:  "",
-				Sell: "",
-				Open: "",
-				Date: 0,
-			},
-			false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := New(os.Getenv("MB_ID"), os.Getenv("MB_SECRET"))
-			got, err := c.Ticker(context.Background(), tt.args.base, tt.args.quote)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Ticker() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Ticker() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	assert.NotEmpty(ticker.Sell, "sell should contain data")
+	assert.NotEmpty(ticker.Buy, "buy should contain data")
 }
 
 func TestClient_Orderbook(t *testing.T) {
-	client := New(os.Getenv("MB_ID"), os.Getenv("MB_SECRET"))
-	o, _ := client.Orderbook(context.Background(), "btc", "brl", WithLimit(1))
-	fmt.Println(o)
+	assert := assert.New(t)
+	client := New()
+	o, err := client.Orderbook(context.Background(), "btc", "brl", WithLimit(1))
+	if err != nil {
+		assert.Failf("test failed", "error response: %+v", err)
+		return
+	}
+	assert.NotEmpty(o.Asks, "asks should contain data")
+	assert.NotEmpty(o.Bids, "bids should contain data")
 }
 
 func ExampleClient_Orderbook() {
-	client := New("<ID>", "<SECRET>")
+	client := New()
 	o, _ := client.Orderbook(context.Background(), "btc", "brl", WithLimit(1))
 	b, _ := json.MarshalIndent(o, "", "  ")
 	fmt.Println(string(b))
@@ -81,7 +52,7 @@ func ExampleClient_Orderbook() {
 }
 
 func ExampleClient_Ticker() {
-	client := New("<ID>", "<SECRET>")
+	client := New()
 	o, _ := client.Ticker(context.Background(), "btc", "brl")
 	b, _ := json.MarshalIndent(o, "", "  ")
 	fmt.Println(string(b))
@@ -101,7 +72,7 @@ func ExampleClient_Ticker() {
 }
 
 func ExampleClient_Trades() {
-	client := New("<ID>", "<SECRET>")
+	client := New()
 	o, _ := client.Trades(context.Background(), "btc", "brl", FromTid(90000))
 	b, _ := json.MarshalIndent(o, "", "  ")
 	fmt.Println(string(b))
