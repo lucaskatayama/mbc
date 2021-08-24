@@ -1,5 +1,8 @@
 
 <div align="center">
+
+# mbc - MercadoBitcoin API Client
+
   
 [![Golang Reference](https://img.shields.io/badge/go-reference-blue?label=v3)](https://pkg.go.dev/lucaskatayama/mbc/v3)
 ![Golang Version](https://img.shields.io/github/go-mod/go-version/lucaskatayama/mbc?filename=.%2Fv3%2Fgo.mod)
@@ -10,12 +13,8 @@
 ![Star](https://img.shields.io/github/stars/lucaskatayama/mbc?style=social)
 ![Fork](https://img.shields.io/github/forks/lucaskatayama/mbc?label=Fork&style=social)
   
-</div>
-
-# mbc
-
 ![](docs/logo.svg)
-
-MercadoBitcoin API Client
+  
+</div>
 
 - **[Quickstart V3](v3/README.md#quickstart)**
