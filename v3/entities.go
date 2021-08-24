@@ -1,5 +1,7 @@
 package mbc
 
+import "encoding/json"
+
 // =======================   PUBLIC   ============================
 
 // Ticker represents the ticker
@@ -48,9 +50,9 @@ type Operation struct {
 // Order represents an order
 type Order struct {
 	ID               int         `json:"order_id"`
-	Pair       string      `json:"coin_pair"`
-	OrderType  OrderType   `json:"order_type"`
-	Status     int         `json:"status"`
+	Pair             string      `json:"coin_pair"`
+	OrderType        OrderType   `json:"order_type"`
+	Status           int         `json:"status"`
 	HasFills         bool        `json:"has_fills"`
 	Qty              string      `json:"quantity"`
 	LimitPrice       string      `json:"limit_price"`
@@ -58,8 +60,8 @@ type Order struct {
 	ExecutedPriceAvg string      `json:"executed_price_avg"`
 	Fee              string      `json:"fee"`
 	CreatedAt        string      `json:"created_timestamp"`
-	UpdatedAt  string      `json:"updated_timestamp"`
-	Operations []Operation `json:"operations"`
+	UpdatedAt        string      `json:"updated_timestamp"`
+	Operations       []Operation `json:"operations"`
 }
 
 type orderD struct {
@@ -69,4 +71,28 @@ type orderD struct {
 	StatusCode          StatusCode `json:"status_code"`
 	ServerUnixTimestamp string     `json:"server_unix_timestamp"`
 	ErrorMessage        string     `json:"error_message"`
+}
+
+type responseD struct {
+	ResponseData        json.RawMessage `json:"response_data"`
+	StatusCode          StatusCode      `json:"status_code"`
+	ServerUnixTimestamp string          `json:"server_unix_timestamp"`
+	ErrorMessage        string          `json:"error_message"`
+}
+
+type balanceD struct {
+	Balances        map[string]Balance         `json:"balance,omitempty"`
+	WithdrawalLimit map[string]WithdrawalLimit `json:"withdrawal_limits,omitempty"`
+}
+
+// Balance represents a balance
+type Balance struct {
+	Available string `json:"available,omitempty"`
+	Total     string `json:"total,omitempty"`
+}
+
+// WithdrawalLimit represents a withdrawal limit
+type WithdrawalLimit struct {
+	Available string `json:"available,omitempty"`
+	Total     string `json:"total,omitempty"`
 }

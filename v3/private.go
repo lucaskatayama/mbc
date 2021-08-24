@@ -68,3 +68,63 @@ func (c *Client) ListOrders(ctx context.Context, base string, quote string, opts
 
 	return orderD.ResponseData.Orders, nil
 }
+
+func (c Client) getAccountInfo(ctx context.Context) (json.RawMessage, error) {
+	form := url.Values{}
+	form.Add("tapi_method", "get_account_info")
+	form.Add("tapi_nonce", fmt.Sprintf("%d", time.Now().UnixNano()))
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, privateEndpoint, strings.NewReader(form.Encode()))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("TAPI-MAC", mac(c.secret, form.Encode()))
+	req.Header.Add("TAPI-ID", c.id)
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	var balances responseD
+	if err := json.NewDecoder(res.Body).Decode(&balances); err != nil {
+		return nil, err
+	}
+	if balances.StatusCode != 100 {
+		return nil, errors.New(balances.ErrorMessage)
+	}
+	return balances.ResponseData, nil
+}
+
+// GetBalances retrieves balances
+func (c Client) GetBalances(ctx context.Context) (map[string]Balance, error) {
+	resp, err := c.getAccountInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var balance balanceD
+	if err := json.Unmarshal(resp, &balance); err != nil {
+		return nil, err
+	}
+
+	return balance.Balances, nil
+}
+
+// GetWithdrawalLimits retrieves withdrawal limits
+func (c Client) GetWithdrawalLimits(ctx context.Context) (map[string]WithdrawalLimit, error) {
+	resp, err := c.getAccountInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var balance balanceD
+	if err := json.Unmarshal(resp, &balance); err != nil {
+		return nil, err
+	}
+
+	return balance.WithdrawalLimit, nil
+}
