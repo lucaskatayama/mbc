@@ -10,7 +10,7 @@ type Client struct {
 
 type ClientOpt func(client *Client)
 
-func WithIdSecret(id, secret string) ClientOpt{
+func WithIdSecret(id, secret string) ClientOpt {
 	return func(client *Client) {
 		client.id = id
 		client.secret = secret
