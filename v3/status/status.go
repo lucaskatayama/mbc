@@ -8,6 +8,6 @@ type Status struct {
 func New(status int, msg string) Status {
 	return Status{
 		Code: status,
-		Msg: msg,
+		Msg:  msg,
 	}
 }

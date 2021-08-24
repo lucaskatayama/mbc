@@ -1,10 +1,9 @@
-
 package mbc
 
 import (
 	"context"
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 // Creates a client for public and private requests
@@ -12,7 +11,6 @@ func ExampleNew() {
 	client := New()
 	client.Trades(context.Background(), "btc", "brl")
 }
-
 
 func TestNew(t *testing.T) {
 	assert := assert.New(t)
@@ -26,7 +24,6 @@ func TestNew(t *testing.T) {
 	assert.NotEmpty(ticker.Buy, "buy should not be empty")
 	assert.NotEmpty(ticker.Sell, "sell should not be empty")
 }
-
 
 func TestNew_WithIdSecretForPublicAPI(t *testing.T) {
 	assert := assert.New(t)
