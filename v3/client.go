@@ -8,8 +8,10 @@ type Client struct {
 	secret string
 }
 
+// ClientOpt represents a client option
 type ClientOpt func(client *Client)
 
+// WithIdSecret adds id/secret auth option to client
 func WithIdSecret(id, secret string) ClientOpt {
 	return func(client *Client) {
 		client.id = id
