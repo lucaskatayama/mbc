@@ -14,7 +14,7 @@ $ go get -u github.com/lucaskatayama/mbc/v3
     - [x] ~~trades~~ Trades
 - Trade API
     - [ ] list_system_messages
-    - [ ] get_account_info
+    - [x] ~~get_account_info~~ GetBalances/GetWithdrawalLimits
     - [ ] get_order
     - [x] ~~list_orders~~ ListOrders
     - [ ] list_orderbook
@@ -27,6 +27,11 @@ $ go get -u github.com/lucaskatayama/mbc/v3
     - [ ] cancel_order
     - [ ] get_withdrawal
     - [ ] withdraw_coin
+
+## CLI
+
+[Under Construction]
+
 
 ## References
 
