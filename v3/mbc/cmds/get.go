@@ -16,6 +16,7 @@ func NewCmdGet() *cobra.Command {
 	}
 
 	cmd.AddCommand(api.NewPublicCmd()...)
+	cmd.AddCommand(api.NewPrivateCmd()...)
 
 	return cmd
 }

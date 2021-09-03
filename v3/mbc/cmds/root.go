@@ -29,6 +29,8 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+	SuggestionsMinimumDistance: 1,
+	DisableSuggestions: false,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -52,6 +54,7 @@ func init() {
 
 
 	rootCmd.AddCommand(NewCmdGet())
+	rootCmd.AddCommand(NewCmdConfig())
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -69,8 +72,8 @@ func initConfig() {
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".mbcv3")
 	}
-
-	viper.AutomaticEnv() // read in environment variables that match
+	//
+	//viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
