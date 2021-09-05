@@ -6,6 +6,66 @@
 $ go get -u github.com/lucaskatayama/mbc/v3
 ```
 
+## Usage
+
+### Initialize client
+
+For public data:
+
+```go
+package main 
+
+import "github.com/lucaskatayama/mbc/v3"
+
+func main() {
+    client := mbc.New()
+}
+```
+
+For private data, use your api key and secret
+
+```go
+package main 
+
+import "github.com/lucaskatayama/mbc/v3"
+
+func main() {
+    client := mbc.New(mbc.WithIdSecret("<id>", "<secret>"))
+}
+```
+
+### Public data
+
+```go
+package main
+
+import (
+  "context"
+  "github.com/lucaskatayama/mbc/v3"
+)
+
+func main() {
+  client := mbc.New()
+  // ticker
+  ticker, err := client.Ticker(context.Background(), "BTC", "BRL")
+  if err != nil {
+	  log.Panic(err)
+  }
+
+  // orderbook
+  ordebook, err := client.Orderbook(context.Background(), "BTC", "BRL")
+  if err != nil {
+    log.Panic(err)
+  }
+
+  // trades
+  trades, err := client.Trades(context.Background(), "BTC", "BRL")
+  if err != nil {
+    log.Panic(err)
+  }
+}
+```
+
 ## API
 
 - Public API
