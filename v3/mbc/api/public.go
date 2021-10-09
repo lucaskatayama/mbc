@@ -6,6 +6,7 @@ func NewPublicCmd() []*cobra.Command {
 	cmds := []*cobra.Command{
 		NewGetOrderbookCmd(),
 		NewGetTickerCmd(),
+		NewGetTradesCmd(),
 	}
 
 	for _, cmd := range cmds {

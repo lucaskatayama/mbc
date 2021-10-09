@@ -16,12 +16,11 @@ func NewGetTradesCmd() *cobra.Command {
 			b := cmd.Flag("base").Value.String()
 			q := cmd.Flag("quote").Value.String()
 			client := mbc.New()
-			t, err := client.Trades(context.Background(), b, q, )
+			t, err := client.Trades(context.Background(), b, q)
 			if err != nil {
 				panic(err)
 			}
 			fmt.Printf("%#v", t)
-
 		},
 	}
 
