@@ -42,18 +42,14 @@ type Orderbook struct {
 }
 
 // OrderbookParams represents an orderbook request param
-// Symbol is an instrument symbol with format BASE-QUOTE
+// InstrumentSymbol is an instrument symbol with format BASE-QUOTE
 type OrderbookParams struct {
-	Symbol string `url:"-"`
+	Symbol InstrumentSymbol `url:"-"`
 }
 
 // GetOrderbook fetches an orderbook given an instrument symbol
 func (s *PublicDataService) GetOrderbook(ctx context.Context, params OrderbookParams, opts ...RequestOpt) (Orderbook, *http.Response, error) {
 	var err error
-	params.Symbol, err = s.normalizeInstrumentSymbol(params.Symbol)
-	if err != nil {
-		return Orderbook{}, nil, err
-	}
 
 	p := fmt.Sprintf("/%s/orderbook", params.Symbol)
 	req, err := s.client.newRequest(ctx, http.MethodGet, p, params, opts)
@@ -71,42 +67,41 @@ func (s *PublicDataService) GetOrderbook(ctx context.Context, params OrderbookPa
 
 // Ticker represents a ticker
 type Ticker struct {
-	Pair   string   `json:"pair"`
-	High   string   `json:"high"`
-	Low    string   `json:"low"`
-	Volume string   `json:"vol"`
-	Last   string   `json:"last"`
-	Buy    string   `json:"buy"`
-	Sell   string   `json:"sell"`
-	Open   string   `json:"open"`
-	Ts     UnixTime `json:"date"`
+	Pair   InstrumentSymbol `json:"pair"`
+	High   string           `json:"high"`
+	Low    string           `json:"low"`
+	Volume string           `json:"vol"`
+	Last   string           `json:"last"`
+	Buy    string           `json:"buy"`
+	Sell   string           `json:"sell"`
+	Open   string           `json:"open"`
+	Ts     UnixTime         `json:"date"`
 }
 
 // TickerParams a ticker request param
 // Symbols represents a list of instrument symbols with format BASE-QUOTE
 type TickerParams struct {
-	Symbols []string `url:"symbols,comma"`
+	Symbols []InstrumentSymbol `url:"symbols,comma"`
 }
 
 // ListTickers fetches a list of tickers given a list of instrument symbols
-func (s *PublicDataService) ListTickers(ctx context.Context, params TickerParams, opts ...RequestOpt) ([]Ticker, error) {
+func (s *PublicDataService) ListTickers(ctx context.Context, params TickerParams, opts ...RequestOpt) ([]Ticker, *http.Response, error) {
 	var err error
-	params.Symbols, err = s.normalizeInstrumentSymbols(params.Symbols)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	req, err := s.client.newRequest(ctx, http.MethodGet, "/tickers", params, opts)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var tickers []Ticker
-	if resp, err := s.client.do(req, &tickers); err != nil {
-		fmt.Print(resp)
-		return nil, err
+	resp, err := s.client.do(req, &tickers)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return tickers, nil
+	return tickers, resp, nil
 }
 
 // Trade respresents a single trade operation
@@ -120,17 +115,16 @@ type Trade struct {
 
 // TradeParams represents a ListTrades request param
 type TradeParams struct {
-	Symbol string    `url:"-"`
-	Tid    int64     `url:"tid,omitempty"`
-	Since  int64     `url:"since,omitempty"`
-	From   time.Time `url:"from,omitempty,unix"`
-	To     time.Time `url:"to,omitempty,unix"`
+	Symbol InstrumentSymbol `url:"-"`
+	Tid    int64            `url:"tid,omitempty"`
+	Since  int64            `url:"since,omitempty"`
+	From   time.Time        `url:"from,omitempty,unix"`
+	To     time.Time        `url:"to,omitempty,unix"`
 }
 
 // ListTrades fetches trades given an instrument symbol
 func (s *PublicDataService) ListTrades(ctx context.Context, params TradeParams, opts ...RequestOpt) ([]Trade, *http.Response, error) {
 	var err error
-	params.Symbol, err = s.normalizeInstrumentSymbol(params.Symbol)
 
 	if err != nil {
 		return nil, nil, err

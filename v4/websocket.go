@@ -8,32 +8,63 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"net/url"
-	"strings"
 	"sync"
 )
 
-// WebsocketHandler represents a websocket message handler (WebsocketMessage)
-type WebsocketHandler func(msg WebsocketMessage)
+// WebSocketHandler represents a websocket message handler (WebSocketMessage)
+type WebSocketHandler func(msg WebSocketMessage)
+
+type Subscription struct {
+	Name  SubscriptionType `json:"name"`
+	Id    InstrumentSymbol `json:"id"`
+	Limit OrderbookSize    `json:"limit,omitempty"`
+}
+
+type Message struct {
+	Type         string       `json:"type"`
+	Subscription Subscription `json:"subscription"`
+}
+
+// OrderbookSize represetns an orderbook size limit on orderbook websocket subscription
+type OrderbookSize int64
+
+const (
+	Orderbook10  OrderbookSize = 10
+	Orderbook20  OrderbookSize = 20
+	Orderbook50  OrderbookSize = 50
+	Orderbook100 OrderbookSize = 100
+	Orderbook200 OrderbookSize = 200
+)
+
+// WebSocketMessage represents a websocket message
+// Data can be unmarshalled
+type WebSocketMessage struct {
+	Type  SubscriptionType `json:"type"`
+	ID    InstrumentSymbol `json:"id"`
+	Limit OrderbookSize    `json:"limit,omitempty"`
+	Data  json.RawMessage  `json:"data"`
+}
 
 type subHandlerMap struct {
 	*sync.RWMutex
-	m map[string]WebsocketHandler
+	m map[string]WebSocketHandler
 }
 
-func (s *subHandlerMap) add(key string, h WebsocketHandler) {
+func (s *subHandlerMap) add(key string, h WebSocketHandler) {
 	s.Lock()
 	s.m[key] = h
 	s.Unlock()
 }
 
-func (s *subHandlerMap) get(key string) (WebsocketHandler, bool) {
+func (s *subHandlerMap) get(key string) (WebSocketHandler, bool) {
 	s.RLock()
 	h, ok := s.m[key]
 	s.RUnlock()
 	return h, ok
 }
 
-type WebsocketService struct {
+// WebSocketService contains Websocket operations
+type WebSocketService struct {
 	conn       *websocket.Conn
 	baseURL    *url.URL
 	subHandler subHandlerMap
@@ -41,7 +72,7 @@ type WebsocketService struct {
 	errHandler func(err error)
 }
 
-func (s *WebsocketService) setBaseURL(base string) error {
+func (s *WebSocketService) setBaseURL(base string) error {
 	u, err := url.Parse(base)
 	if err != nil {
 		return err
@@ -50,17 +81,8 @@ func (s *WebsocketService) setBaseURL(base string) error {
 	return nil
 }
 
-// WebsocketMessage represents a websocket message
-// Data can be unmarshalled
-type WebsocketMessage struct {
-	Type  string          `json:"type"`
-	ID    string          `json:"id"`
-	Limit int64           `json:"limit"`
-	Data  json.RawMessage `json:"data"`
-}
-
 // Connect connects to the websocket server and starts listening to messages
-func (s *WebsocketService) Connect(ctx context.Context) error {
+func (s *WebSocketService) Connect(ctx context.Context) error {
 	conn, _, err := websocket.DefaultDialer.DialContext(ctx, s.baseURL.String(), http.Header{
 		"Origin": []string{"github.com/lucaskatayama/mbc"},
 	})
@@ -76,12 +98,13 @@ func (s *WebsocketService) Connect(ctx context.Context) error {
 				s.errHandler(err)
 				return
 			}
-			var m WebsocketMessage
+			var m WebSocketMessage
 			if err := json.Unmarshal(message, &m); err != nil {
 				s.errHandler(err)
 				continue
 			}
-			i := fmt.Sprintf("%s-%s", m.ID[3:], m.ID[:3])
+			i := m.ID.normalize()
+			m.ID = i
 			if m.Data == nil {
 				continue
 			}
@@ -95,17 +118,28 @@ func (s *WebsocketService) Connect(ctx context.Context) error {
 	return nil
 }
 
-func (s *WebsocketService) OnErr(h func(err error)) {
+// Close closes a websocket connection
+func (s *WebSocketService) Close() error {
+	if s.conn != nil {
+		return s.conn.Close()
+	}
+	return nil
+}
+
+// OnError sets an error handler
+func (s *WebSocketService) OnError(h func(err error)) {
 	s.errHandler = h
 }
 
-func (s *WebsocketService) Send(msg interface{}) error {
+// Send sends a generic message
+func (s *WebSocketService) Send(msg interface{}) error {
 	if s.conn == nil {
 		return errors.New("not connected")
 	}
 	return s.conn.WriteJSON(msg)
 }
 
+// SubscriptionType represents a websocket subscription type
 type SubscriptionType string
 
 const (
@@ -114,16 +148,7 @@ const (
 	TradeType     SubscriptionType = "trade"
 )
 
-func (s *WebsocketService) normalizeInstrument(in string) string {
-	if strings.Contains(in, "-") {
-		parts := strings.Split(strings.ToUpper(in), "-")
-		return fmt.Sprintf("%s%s", parts[1], parts[0])
-	}
-	return in
-}
-
-func (s *WebsocketService) subscribe(t SubscriptionType, instrument string, limit OrderbookSize, h func(msg WebsocketMessage)) error {
-	instrument = strings.ToUpper(instrument)
+func (s *WebSocketService) subscribe(t SubscriptionType, instrument InstrumentSymbol, limit OrderbookSize, h func(msg WebSocketMessage)) error {
 	if s.conn == nil {
 		return errors.New("not connected")
 	}
@@ -132,50 +157,22 @@ func (s *WebsocketService) subscribe(t SubscriptionType, instrument string, limi
 
 	return s.conn.WriteJSON(Message{
 		Type: "subscribe",
-		Subscription: Sub{
-			Name:  string(t),
-			Id:    s.normalizeInstrument(instrument),
+		Subscription: Subscription{
+			Name:  t,
+			Id:    instrument.toMB(),
 			Limit: limit,
 		},
 	})
 }
 
-func (s *WebsocketService) Ticker(instrument string, h WebsocketHandler) error {
-	return s.subscribe(TickerType, instrument, 0, h)
-}
-
-type OrderbookSize int64
-
-const (
-	Orderbook10  OrderbookSize = 10
-	Orderbook20  OrderbookSize = 20
-	Orderbook50  OrderbookSize = 50
-	Orderbook100 OrderbookSize = 100
-	Orderbook200 OrderbookSize = 200
-)
-
-func (s *WebsocketService) Orderbook(instrument string, size OrderbookSize, h WebsocketHandler) error {
+func (s *WebSocketService) SubscribeOrderbook(instrument InstrumentSymbol, size OrderbookSize, h WebSocketHandler) error {
 	return s.subscribe(OrderbookType, instrument, size, h)
 }
 
-func (s *WebsocketService) Trade(instrument string, h WebsocketHandler) error {
+func (s *WebSocketService) SubscribeTrade(instrument InstrumentSymbol, h WebSocketHandler) error {
 	return s.subscribe(TradeType, instrument, 0, h)
 }
 
-func (s *WebsocketService) Close() error {
-	if s.conn != nil {
-		return s.conn.Close()
-	}
-	return nil
-}
-
-type Sub struct {
-	Name  string        `json:"name"`
-	Id    string        `json:"id"`
-	Limit OrderbookSize `json:"limit,omitempty"`
-}
-
-type Message struct {
-	Type         string `json:"type"`
-	Subscription Sub    `json:"subscription"`
+func (s *WebSocketService) SubscribeTicker(instrument InstrumentSymbol, h WebSocketHandler) error {
+	return s.subscribe(TickerType, instrument, 0, h)
 }

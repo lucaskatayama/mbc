@@ -39,14 +39,14 @@ type Client struct {
 	// id and secret used for basic authentication.
 	id, secret string
 
-	UserAgent string
+	userAgent string
 
 	PublicData *PublicDataService
-	Websocket  *WebsocketService
+	Websocket  *WebSocketService
 }
 
 func newClient(opts ...ClientOpt) (*Client, error) {
-	c := &Client{UserAgent: userAgent}
+	c := &Client{userAgent: userAgent}
 	// Configure the HTTP client.
 	c.client = &retryablehttp.Client{
 		CheckRetry:   retryablehttp.DefaultRetryPolicy,
@@ -119,8 +119,8 @@ func (c *Client) newRequest(ctx context.Context, method string, path string, bod
 	reqHeaders := make(http.Header)
 	reqHeaders.Set("Accept", "application/json")
 
-	if c.UserAgent != "" {
-		reqHeaders.Set("User-Agent", c.UserAgent)
+	if c.userAgent != "" {
+		reqHeaders.Set("User-Agent", c.userAgent)
 	}
 
 	var rBody interface{}

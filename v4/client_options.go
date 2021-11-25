@@ -37,10 +37,10 @@ func WithBaseURL(u string) ClientOpt {
 // WithWebsocket enables websocket on client
 func WithWebsocket() ClientOpt {
 	return func(c *Client) error {
-		c.Websocket = &WebsocketService{
+		c.Websocket = &WebSocketService{
 			subHandler: subHandlerMap{
 				RWMutex: &sync.RWMutex{},
-				m:       map[string]WebsocketHandler{},
+				m:       map[string]WebSocketHandler{},
 			},
 		}
 		if err := c.Websocket.setBaseURL(defaultWSBaseURL); err != nil {

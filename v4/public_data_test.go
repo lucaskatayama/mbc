@@ -62,7 +62,7 @@ func TestPublicDataService_GetTickers(t *testing.T) {
 			symbols := strings.Split(r.URL.Query().Get("symbols"), ",")
 			for _, s := range symbols {
 				data = append(data, mbc.Ticker{
-					Pair:   s,
+					Pair:   mbc.InstrumentSymbol(s),
 					High:   "1",
 					Low:    "0",
 					Volume: "10",
@@ -79,8 +79,8 @@ func TestPublicDataService_GetTickers(t *testing.T) {
 		},
 	)
 
-	params := mbc.TickerParams{Symbols: []string{"BTC-BRL", "LTC-BRL"}}
-	got, err := client.PublicData.ListTickers(context.Background(), params)
+	params := mbc.TickerParams{Symbols: []mbc.InstrumentSymbol{"BTC-BRL", "LTC-BRL"}}
+	got, _, err := client.PublicData.ListTickers(context.Background(), params)
 	if err != nil {
 		t.Fatalf("PublicData.ListTickers returned error: %v", err)
 	}
@@ -144,5 +144,86 @@ func TestName(t *testing.T) {
 		t.Fatalf("response is not 200/OK: %d", resp.StatusCode)
 	}
 
+	fmt.Println(o)
+}
+
+func Test_getOrderbook(t *testing.T) {
+	client, err := mbc.NewPublicOnlyClient()
+	if err != nil {
+		panic(err)
+	}
+	o, resp, err := client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTCBRL})
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		panic("not ok")
+	}
+	fmt.Println(o)
+}
+
+func ExampleNewClient() {
+	client, err := mbc.NewClient("id", "secret")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(client)
+}
+
+func ExampleNewPublicOnlyClient() {
+	client, err := mbc.NewPublicOnlyClient()
+	if err != nil {
+		panic(err)
+	}
+	client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{mbc.BTCBRL})
+}
+
+func ExampleNewPublicOnlyClient_getOrderbook() {
+	client, err := mbc.NewPublicOnlyClient()
+	if err != nil {
+		panic(err)
+	}
+	o, resp, err := client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTCBRL})
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		panic("not ok")
+	}
+	fmt.Println(o)
+}
+
+func ExampleNewPublicOnlyClient_listTickers() {
+	client, err := mbc.NewPublicOnlyClient()
+	if err != nil {
+		panic(err)
+	}
+	o, resp, err := client.PublicData.ListTickers(context.Background(), mbc.TickerParams{Symbols: []mbc.InstrumentSymbol{mbc.BTCBRL}})
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		panic("not ok")
+	}
+	fmt.Println(o)
+}
+
+func ExampleNewPublicOnlyClient_listTrades() {
+	client, err := mbc.NewPublicOnlyClient()
+	if err != nil {
+		panic(err)
+	}
+	o, resp, err := client.PublicData.ListTrades(context.Background(), mbc.TradeParams{Symbol: mbc.BTCBRL})
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		panic("not ok")
+	}
 	fmt.Println(o)
 }
