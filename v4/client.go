@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/google/go-querystring/query"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/go-retryablehttp"
@@ -25,6 +24,7 @@ type AuthType int
 
 const (
 	BasicAuth AuthType = iota
+	OAuth
 )
 
 type Client struct {
@@ -36,8 +36,8 @@ type Client struct {
 	// disableRetries is used to disable the default retry logic.
 	disableRetries bool
 
-	// username and password used for basic authentication.
-	username, password string
+	// id and secret used for basic authentication.
+	id, secret string
 
 	UserAgent string
 
@@ -82,14 +82,14 @@ func (c *Client) setBaseURL(baseURL string) error {
 	return nil
 }
 
-// NewClient returns a client with username/password authentication
-func NewClient(username, password string, opts ...ClientOpt) (*Client, error) {
+// NewClient returns a client with id/secret authentication
+func NewClient(id, secret string, opts ...ClientOpt) (*Client, error) {
 	client, err := newClient(opts...)
 	if err != nil {
 		return nil, err
 	}
-	client.username = username
-	client.password = password
+	client.id = id
+	client.secret = secret
 	return client, nil
 }
 
@@ -102,9 +102,11 @@ func NewPublicOnlyClient(opts ...ClientOpt) (*Client, error) {
 	return client, nil
 }
 
+// RequestOpt changes the retryablehttp.Request
 type RequestOpt func(r *retryablehttp.Request) error
 
-func (c *Client) NewRequest(ctx context.Context, method string, path string, body interface{}, options []RequestOpt) (*retryablehttp.Request, error) {
+// newRequest creates a request
+func (c *Client) newRequest(ctx context.Context, method string, path string, body interface{}, options []RequestOpt) (*retryablehttp.Request, error) {
 	u := *c.baseURL
 	p, err := url.PathUnescape(path)
 	if err != nil {
@@ -145,7 +147,6 @@ func (c *Client) NewRequest(ctx context.Context, method string, path string, bod
 		return nil, err
 	}
 	req = req.WithContext(ctx)
-	fmt.Println(req.URL.String())
 
 	for _, fn := range options {
 		if fn == nil {
@@ -165,11 +166,8 @@ func (c *Client) NewRequest(ctx context.Context, method string, path string, bod
 
 }
 
-type Response struct {
-	*http.Response
-}
-
-func (c *Client) Do(req *retryablehttp.Request, ptr interface{}) (*http.Response, error) {
+// do executes a request
+func (c *Client) do(req *retryablehttp.Request, ptr interface{}) (*http.Response, error) {
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err

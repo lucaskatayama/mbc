@@ -8,6 +8,7 @@ import (
 
 type ClientOpt func(c *Client) error
 
+// WithMaxRetries set a maximun retry limit
 func WithMaxRetries(n int) ClientOpt {
 	return func(c *Client) error {
 		c.client.RetryMax = n
@@ -15,6 +16,7 @@ func WithMaxRetries(n int) ClientOpt {
 	}
 }
 
+// WithErrorHandler sets a global error handler
 func WithErrorHandler(h retryablehttp.ErrorHandler) ClientOpt {
 	return func(c *Client) error {
 		if h == nil {
@@ -25,12 +27,20 @@ func WithErrorHandler(h retryablehttp.ErrorHandler) ClientOpt {
 	}
 }
 
+// WithBaseURL changes the base URL
+func WithBaseURL(u string) ClientOpt {
+	return func(c *Client) error {
+		return c.setBaseURL(u)
+	}
+}
+
+// WithWebsocket enables websocket on client
 func WithWebsocket() ClientOpt {
 	return func(c *Client) error {
 		c.Websocket = &WebsocketService{
 			subHandler: subHandlerMap{
 				RWMutex: &sync.RWMutex{},
-				m:       map[string]func(msg []byte){},
+				m:       map[string]WebsocketHandler{},
 			},
 		}
 		if err := c.Websocket.setBaseURL(defaultWSBaseURL); err != nil {

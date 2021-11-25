@@ -12,18 +12,21 @@ import (
 	"sync"
 )
 
+// WebsocketHandler represents a websocket message handler (WebsocketMessage)
+type WebsocketHandler func(msg WebsocketMessage)
+
 type subHandlerMap struct {
 	*sync.RWMutex
-	m map[string]func(msg []byte)
+	m map[string]WebsocketHandler
 }
 
-func (s *subHandlerMap) add(key string, h func(msg []byte)) {
+func (s *subHandlerMap) add(key string, h WebsocketHandler) {
 	s.Lock()
 	s.m[key] = h
 	s.Unlock()
 }
 
-func (s *subHandlerMap) get(key string) (func(msg []byte), bool) {
+func (s *subHandlerMap) get(key string) (WebsocketHandler, bool) {
 	s.RLock()
 	h, ok := s.m[key]
 	s.RUnlock()
@@ -47,7 +50,9 @@ func (s *WebsocketService) setBaseURL(base string) error {
 	return nil
 }
 
-type WSMsg struct {
+// WebsocketMessage represents a websocket message
+// Data can be unmarshalled
+type WebsocketMessage struct {
 	Type  string          `json:"type"`
 	ID    string          `json:"id"`
 	Limit int64           `json:"limit"`
@@ -71,7 +76,7 @@ func (s *WebsocketService) Connect(ctx context.Context) error {
 				s.errHandler(err)
 				return
 			}
-			var m WSMsg
+			var m WebsocketMessage
 			if err := json.Unmarshal(message, &m); err != nil {
 				s.errHandler(err)
 				continue
@@ -82,7 +87,7 @@ func (s *WebsocketService) Connect(ctx context.Context) error {
 			}
 			key := fmt.Sprintf("%s.%s.%d", i, m.Type, m.Limit)
 			if h, ok := s.subHandler.get(key); ok {
-				h(m.Data)
+				h(m)
 			}
 		}
 	}()
@@ -117,7 +122,7 @@ func (s *WebsocketService) normalizeInstrument(in string) string {
 	return in
 }
 
-func (s *WebsocketService) subscribe(t SubscriptionType, instrument string, limit OrderbookSize, h func(msg []byte)) error {
+func (s *WebsocketService) subscribe(t SubscriptionType, instrument string, limit OrderbookSize, h func(msg WebsocketMessage)) error {
 	instrument = strings.ToUpper(instrument)
 	if s.conn == nil {
 		return errors.New("not connected")
@@ -135,7 +140,7 @@ func (s *WebsocketService) subscribe(t SubscriptionType, instrument string, limi
 	})
 }
 
-func (s *WebsocketService) Ticker(instrument string, h func(msg []byte)) error {
+func (s *WebsocketService) Ticker(instrument string, h WebsocketHandler) error {
 	return s.subscribe(TickerType, instrument, 0, h)
 }
 
@@ -149,11 +154,11 @@ const (
 	Orderbook200 OrderbookSize = 200
 )
 
-func (s *WebsocketService) Orderbook(instrument string, size OrderbookSize, h func(msg []byte)) error {
+func (s *WebsocketService) Orderbook(instrument string, size OrderbookSize, h WebsocketHandler) error {
 	return s.subscribe(OrderbookType, instrument, size, h)
 }
 
-func (s *WebsocketService) Trade(instrument string, h func(msg []byte)) error {
+func (s *WebsocketService) Trade(instrument string, h WebsocketHandler) error {
 	return s.subscribe(TradeType, instrument, 0, h)
 }
 

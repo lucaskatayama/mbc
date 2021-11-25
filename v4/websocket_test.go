@@ -24,9 +24,9 @@ func TestWebsocket_Simple(t *testing.T) {
 
 	c.Websocket.Connect(context.Background())
 
-	handler := func(name string) func(msg []byte) {
-		return func(msg []byte) {
-			fmt.Printf("[%s] %v\n", name, string(msg))
+	handler := func(name string) mbc.WebsocketHandler {
+		return func(msg mbc.WebsocketMessage) {
+			fmt.Printf("[%s] %v\n", name, string(msg.Data))
 		}
 	}
 	c.Websocket.Orderbook("BTC-BRl", mbc.Orderbook10, handler("ordebook"))
