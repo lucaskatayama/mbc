@@ -49,3 +49,14 @@ func WithWebsocket() ClientOpt {
 		return nil
 	}
 }
+
+// WithLogger sets a logger to client
+func WithLogger(log Log) ClientOpt {
+	return func(c *Client) error {
+		c.log = log
+		if log == nil {
+			return errors.New("log should not be nil")
+		}
+		return nil
+	}
+}

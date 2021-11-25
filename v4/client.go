@@ -43,10 +43,37 @@ type Client struct {
 
 	PublicData *PublicDataService
 	Websocket  *WebSocketService
+	log        Log
+}
+
+// RequestOpt changes the retryablehttp.Request
+type RequestOpt func(r *retryablehttp.Request) error
+
+// NewClient returns a client with id/secret authentication
+func NewClient(id, secret string, opts ...ClientOpt) (*Client, error) {
+	client, err := newClient(opts...)
+	if err != nil {
+		return nil, err
+	}
+	client.id = id
+	client.secret = secret
+	return client, nil
+}
+
+// NewPublicOnlyClient returns a client for PublicData access only
+func NewPublicOnlyClient(opts ...ClientOpt) (*Client, error) {
+	client, err := newClient(opts...)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 func newClient(opts ...ClientOpt) (*Client, error) {
-	c := &Client{userAgent: userAgent}
+	c := &Client{
+		userAgent: userAgent,
+		log:       logMock{},
+	}
 	// Configure the HTTP client.
 	c.client = &retryablehttp.Client{
 		CheckRetry:   retryablehttp.DefaultRetryPolicy,
@@ -81,29 +108,6 @@ func (c *Client) setBaseURL(baseURL string) error {
 	c.baseURL = u
 	return nil
 }
-
-// NewClient returns a client with id/secret authentication
-func NewClient(id, secret string, opts ...ClientOpt) (*Client, error) {
-	client, err := newClient(opts...)
-	if err != nil {
-		return nil, err
-	}
-	client.id = id
-	client.secret = secret
-	return client, nil
-}
-
-// NewPublicOnlyClient returns a client for PublicData access only
-func NewPublicOnlyClient(opts ...ClientOpt) (*Client, error) {
-	client, err := newClient(opts...)
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
-}
-
-// RequestOpt changes the retryablehttp.Request
-type RequestOpt func(r *retryablehttp.Request) error
 
 // newRequest creates a request
 func (c *Client) newRequest(ctx context.Context, method string, path string, body interface{}, options []RequestOpt) (*retryablehttp.Request, error) {
@@ -168,12 +172,14 @@ func (c *Client) newRequest(ctx context.Context, method string, path string, bod
 
 // do executes a request
 func (c *Client) do(req *retryablehttp.Request, ptr interface{}) (*http.Response, error) {
+	c.log.Debugf("%s %s", req.Method, req.URL.String())
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
+	c.log.Debugf("%d", resp.StatusCode)
 	if resp.StatusCode > 400 {
 		return nil, errors.New("request error")
 	}

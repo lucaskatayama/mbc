@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/lucaskatayama/mbc/v4"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"strings"
@@ -152,7 +153,7 @@ func Test_getOrderbook(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	o, resp, err := client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTCBRL})
+	o, resp, err := client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTC_BRL})
 	if err != nil {
 		panic(err)
 	}
@@ -177,7 +178,7 @@ func ExampleNewPublicOnlyClient() {
 	if err != nil {
 		panic(err)
 	}
-	client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{mbc.BTCBRL})
+	client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{mbc.BTC_BRL})
 }
 
 func ExampleNewPublicOnlyClient_getOrderbook() {
@@ -185,7 +186,7 @@ func ExampleNewPublicOnlyClient_getOrderbook() {
 	if err != nil {
 		panic(err)
 	}
-	o, resp, err := client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTCBRL})
+	o, resp, err := client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTC_BRL})
 	if err != nil {
 		panic(err)
 	}
@@ -201,7 +202,7 @@ func ExampleNewPublicOnlyClient_listTickers() {
 	if err != nil {
 		panic(err)
 	}
-	o, resp, err := client.PublicData.ListTickers(context.Background(), mbc.TickerParams{Symbols: []mbc.InstrumentSymbol{mbc.BTCBRL}})
+	o, resp, err := client.PublicData.ListTickers(context.Background(), mbc.TickerParams{Symbols: []mbc.InstrumentSymbol{mbc.BTC_BRL}})
 	if err != nil {
 		panic(err)
 	}
@@ -217,7 +218,7 @@ func ExampleNewPublicOnlyClient_listTrades() {
 	if err != nil {
 		panic(err)
 	}
-	o, resp, err := client.PublicData.ListTrades(context.Background(), mbc.TradeParams{Symbol: mbc.BTCBRL})
+	o, resp, err := client.PublicData.ListTrades(context.Background(), mbc.TradeParams{Symbol: mbc.BTC_BRL})
 	if err != nil {
 		panic(err)
 	}
@@ -226,4 +227,12 @@ func ExampleNewPublicOnlyClient_listTrades() {
 		panic("not ok")
 	}
 	fmt.Println(o)
+}
+
+func ExampleNewPublicOnlyClient_withLogrusLogger() {
+	log := logrus.New()
+	log.SetLevel(logrus.FatalLevel)
+	client, _ := mbc.NewPublicOnlyClient(mbc.WithLogger(log))
+
+	client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTC_BRL})
 }
