@@ -7,12 +7,26 @@ import (
 	"testing"
 )
 
-func setup(t *testing.T) (*http.ServeMux, *httptest.Server, *mbc.Client) {
+func setupPublicOnly(t *testing.T) (*http.ServeMux, *httptest.Server, *mbc.Client) {
 	mux := http.NewServeMux()
 
 	server := httptest.NewServer(mux)
 
-	client, err := mbc.NewClient("", "", mbc.WithBaseURL(server.URL))
+	client, err := mbc.NewPublicOnlyClient(mbc.WithBaseURL(server.URL))
+	if err != nil {
+		server.Close()
+		t.Fatalf("Failed to create client: %v", err)
+	}
+
+	return mux, server, client
+}
+
+func setup(t *testing.T, id, secret string) (*http.ServeMux, *httptest.Server, *mbc.Client) {
+	mux := http.NewServeMux()
+
+	server := httptest.NewServer(mux)
+
+	client, err := mbc.NewClient(id, secret, mbc.WithBaseURL(server.URL))
 	if err != nil {
 		server.Close()
 		t.Fatalf("Failed to create client: %v", err)

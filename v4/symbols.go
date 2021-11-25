@@ -6,6 +6,7 @@ import (
 )
 
 // InstrumentSymbol represents an instrument symbol with format BASE-QUOTE
+// e.g. BTC-BRL
 type InstrumentSymbol string
 
 const (
@@ -38,4 +39,16 @@ func (i InstrumentSymbol) normalize() InstrumentSymbol {
 
 func (i InstrumentSymbol) toMB() InstrumentSymbol {
 	return InstrumentSymbol(fmt.Sprintf("%s%s", i.Quote(), i.Base()))
+}
+
+// AssetSymbol represents an asset symbol
+// e.g BTC
+type AssetSymbol string
+
+func (a AssetSymbol) String() string {
+	return strings.ToUpper(string(a))
+}
+
+func (a AssetSymbol) normalize() AssetSymbol {
+	return AssetSymbol(a.String())
 }

@@ -16,7 +16,7 @@ import (
 func TestPublicDataService_GetOrderbook(t *testing.T) {
 	assert := assert.New(t)
 
-	mux, server, client := setup(t)
+	mux, server, client := setupPublicOnly(t)
 	defer teardown(server)
 
 	mux.HandleFunc("/api/v4/BTC-BRL/orderbook",
@@ -51,7 +51,7 @@ func TestPublicDataService_GetOrderbook(t *testing.T) {
 func TestPublicDataService_GetTickers(t *testing.T) {
 	assert := assert.New(t)
 
-	mux, server, client := setup(t)
+	mux, server, client := setupPublicOnly(t)
 	defer teardown(server)
 
 	mux.HandleFunc("/api/v4/tickers",
@@ -94,7 +94,7 @@ func TestPublicDataService_GetTickers(t *testing.T) {
 func TestPublicDataService_GetTrades(t *testing.T) {
 	assert := assert.New(t)
 
-	mux, server, client := setup(t)
+	mux, server, client := setupPublicOnly(t)
 	defer teardown(server)
 
 	mux.HandleFunc("/api/v4/BTC-BRL/trades",

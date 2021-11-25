@@ -42,6 +42,8 @@ type Client struct {
 	userAgent string
 
 	PublicData *PublicDataService
+	Account    *AccountService
+	Trading    *TradingService
 	Websocket  *WebSocketService
 	log        Log
 }
@@ -88,6 +90,8 @@ func newClient(opts ...ClientOpt) (*Client, error) {
 	_ = c.setBaseURL(defaultBaseURL)
 
 	c.PublicData = &PublicDataService{c}
+	c.Account = &AccountService{c}
+	c.Trading = &TradingService{c}
 
 	for _, opt := range opts {
 		if err := opt(c); err != nil {
