@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/lucaskatayama/mbc/v4/utils"
 )
 
 // PublicDataService contains all Public Data API operations
@@ -36,9 +38,9 @@ func (s *PublicDataService) normalizeInstrumentSymbols(symbols []string) ([]stri
 
 // Orderbook represents an orderbook
 type Orderbook struct {
-	Asks [][]float64 `json:"asks"`
-	Bids [][]float64 `json:"bids"`
-	Ts   UnixTime    `json:"timestamp"`
+	Asks [][]float64    `json:"asks"`
+	Bids [][]float64    `json:"bids"`
+	Ts   utils.UnixTime `json:"timestamp"`
 }
 
 // OrderbookParams represents an orderbook request param
@@ -75,7 +77,7 @@ type Ticker struct {
 	Buy    string           `json:"buy"`
 	Sell   string           `json:"sell"`
 	Open   string           `json:"open"`
-	Ts     UnixTime         `json:"date"`
+	Ts     utils.UnixTime   `json:"date"`
 }
 
 // TickerParams a ticker request param
@@ -106,11 +108,11 @@ func (s *PublicDataService) ListTickers(ctx context.Context, params TickerParams
 
 // Trade respresents a single trade operation
 type Trade struct {
-	Tid    int64    `json:"tid"`
-	Ts     UnixTime `json:"date"`
-	Type   string   `json:"type"`
-	Price  float64  `json:"price"`
-	Amount float64  `json:"amount"`
+	Tid    int64          `json:"tid"`
+	Ts     utils.UnixTime `json:"date"`
+	Type   string         `json:"type"`
+	Price  float64        `json:"price"`
+	Amount float64        `json:"amount"`
 }
 
 // TradeParams represents a ListTrades request param

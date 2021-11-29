@@ -2,8 +2,11 @@ package mbc
 
 import (
 	"errors"
-	"github.com/hashicorp/go-retryablehttp"
 	"sync"
+
+	"github.com/hashicorp/go-retryablehttp"
+
+	"github.com/lucaskatayama/mbc/v4/utils"
 )
 
 type ClientOpt func(c *Client) error
@@ -51,7 +54,7 @@ func WithWebsocket() ClientOpt {
 }
 
 // WithLogger sets a logger to client
-func WithLogger(log Log) ClientOpt {
+func WithLogger(log utils.Log) ClientOpt {
 	return func(c *Client) error {
 		c.log = log
 		if log == nil {

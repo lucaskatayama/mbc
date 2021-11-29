@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/google/go-querystring/query"
-	"github.com/hashicorp/go-cleanhttp"
-	"github.com/hashicorp/go-retryablehttp"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/google/go-querystring/query"
+	"github.com/hashicorp/go-cleanhttp"
+	"github.com/hashicorp/go-retryablehttp"
+
+	"github.com/lucaskatayama/mbc/v4/utils"
 )
 
 const (
@@ -45,7 +48,7 @@ type Client struct {
 	Account    *AccountService
 	Trading    *TradingService
 	Websocket  *WebSocketService
-	log        Log
+	log        utils.Log
 }
 
 // RequestOpt changes the retryablehttp.Request
@@ -74,7 +77,7 @@ func NewPublicOnlyClient(opts ...ClientOpt) (*Client, error) {
 func newClient(opts ...ClientOpt) (*Client, error) {
 	c := &Client{
 		userAgent: userAgent,
-		log:       logMock{},
+		log:       utils.DummyLog{},
 	}
 	// Configure the HTTP client.
 	c.client = &retryablehttp.Client{

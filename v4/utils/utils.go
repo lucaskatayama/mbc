@@ -1,4 +1,4 @@
-package mbc
+package utils
 
 import (
 	"encoding/json"
@@ -7,12 +7,10 @@ import (
 )
 
 // UnixTime represents an UnixTime
-type UnixTime struct {
-	time.Time
-}
+type UnixTime time.Time
 
 func (u UnixTime) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("%d", u.Unix())), nil
+	return []byte(fmt.Sprintf("%d", time.Time(u).Unix())), nil
 }
 
 func (u *UnixTime) UnmarshalJSON(bytes []byte) error {
@@ -20,7 +18,7 @@ func (u *UnixTime) UnmarshalJSON(bytes []byte) error {
 	if err := json.Unmarshal(bytes, &unix); err != nil {
 		return err
 	}
-	u.Time = time.Unix(unix, 0)
+	*u = UnixTime(time.Unix(unix, 0))
 	return nil
 }
 
@@ -31,12 +29,12 @@ type Log interface {
 	Errorf(fmt string, params ...interface{})
 }
 
-type logMock struct{}
+type DummyLog struct{}
 
-func (l logMock) Infof(fmt string, params ...interface{}) {}
+func (l DummyLog) Infof(fmt string, params ...interface{}) {}
 
-func (l logMock) Debugf(fmt string, params ...interface{}) {}
+func (l DummyLog) Debugf(fmt string, params ...interface{}) {}
 
-func (l logMock) Warningf(fmt string, params ...interface{}) {}
+func (l DummyLog) Warningf(fmt string, params ...interface{}) {}
 
-func (l logMock) Errorf(fmt string, params ...interface{}) {}
+func (l DummyLog) Errorf(fmt string, params ...interface{}) {}

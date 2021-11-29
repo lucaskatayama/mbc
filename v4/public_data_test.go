@@ -4,13 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/lucaskatayama/mbc/v4"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
+	"github.com/lucaskatayama/mbc/v4/utils"
+
 	"net/http"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPublicDataService_GetOrderbook(t *testing.T) {
@@ -71,7 +75,7 @@ func TestPublicDataService_GetTickers(t *testing.T) {
 					Buy:    "10",
 					Sell:   "10",
 					Open:   "10",
-					Ts:     mbc.UnixTime{time.Now()},
+					Ts:     utils.UnixTime(time.Now()),
 				})
 			}
 
@@ -106,7 +110,7 @@ func TestPublicDataService_GetTrades(t *testing.T) {
 			for i := 0; i < 1000; i++ {
 				data = append(data, mbc.Trade{
 					Tid:    int64(i),
-					Ts:     mbc.UnixTime{Time: time.Now()},
+					Ts:     utils.UnixTime(time.Now()),
 					Type:   "buy",
 					Price:  10,
 					Amount: 10,

@@ -3,13 +3,16 @@ package mbc
 import (
 	"context"
 	"fmt"
+	"github.com/lucaskatayama/mbc/v4/utils"
 	"net/http"
 )
 
+// TradingService handles trading operations
 type TradingService struct {
 	client *Client
 }
 
+// OrderType represents an order type
 type OrderType string
 
 const (
@@ -18,6 +21,7 @@ const (
 	PostOnly OrderType = "post-only"
 )
 
+// OrderSide represents an order side
 type OrderSide string
 
 const (
@@ -25,6 +29,7 @@ const (
 	Sell OrderSide = "sell"
 )
 
+// OrderRequest represents a place order request
 type OrderRequest struct {
 	Type       OrderType `json:"type"`
 	Side       OrderSide `json:"side"`
@@ -40,11 +45,11 @@ type Order struct {
 	Side       OrderSide        `json:"side"`
 	Type       OrderType        `json:"type"`
 	Status     string           `json:"status"`
-	CreatedAt  UnixTime         `json:"created_at"`
-	UpdatedAt  UnixTime         `json:"updated_at"`
+	CreatedAt  utils.UnixTime   `json:"created_at"`
+	UpdatedAt  utils.UnixTime   `json:"updated_at"`
 	Qty        float64          `json:"qty"`
 	LimitPrice int              `json:"limitPrice"`
-	AvgPrice   UnixTime         `json:"avgPrice"`
+	AvgPrice   utils.UnixTime   `json:"avgPrice"`
 	FilledQty  float64          `json:"filledQty"`
 	Operations []Operations     `json:"executions"`
 }

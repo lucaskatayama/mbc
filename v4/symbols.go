@@ -18,11 +18,13 @@ func (i InstrumentSymbol) String() string {
 	return strings.ToUpper(string(i))
 }
 
+// Base returns the base symbol
 func (i InstrumentSymbol) Base() string {
 	parts := strings.Split(strings.ToUpper(string(i)), "-")
 	return parts[0]
 }
 
+// Quote returns the quote symbol
 func (i InstrumentSymbol) Quote() string {
 	parts := strings.Split(strings.ToUpper(string(i)), "-")
 	return parts[1]
