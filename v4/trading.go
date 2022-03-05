@@ -3,8 +3,9 @@ package mbc
 import (
 	"context"
 	"fmt"
-	"github.com/lucaskatayama/mbc/v4/utils"
 	"net/http"
+
+	"github.com/lucaskatayama/mbc/v4/utils"
 )
 
 // TradingService handles trading operations
@@ -16,9 +17,10 @@ type TradingService struct {
 type OrderType string
 
 const (
-	Market   OrderType = "market"
-	Limit    OrderType = "limit"
-	PostOnly OrderType = "post-only"
+	Market    OrderType = "market"
+	Limit     OrderType = "limit"
+	PostOnly  OrderType = "post-only"
+	StopLimit OrderType = "stop-limit"
 )
 
 // OrderSide represents an order side
@@ -34,9 +36,9 @@ type OrderRequest struct {
 	Type       OrderType `json:"type"`
 	Side       OrderSide `json:"side"`
 	Async      bool      `json:"async"`
-	Cost       int       `json:"cost,omitempty"`
-	LimitPrice int       `json:"limitPrice,omitempty"`
-	Qty        float64   `json:"qty,omitempty"`
+	Cost       string    `json:"cost,omitempty"`
+	LimitPrice string    `json:"limitPrice,omitempty"`
+	Qty        string    `json:"qty,omitempty"`
 }
 
 type Order struct {
@@ -47,10 +49,10 @@ type Order struct {
 	Status     string           `json:"status"`
 	CreatedAt  utils.UnixTime   `json:"created_at"`
 	UpdatedAt  utils.UnixTime   `json:"updated_at"`
-	Qty        float64          `json:"qty"`
-	LimitPrice int              `json:"limitPrice"`
+	Qty        string           `json:"qty"`
+	LimitPrice string           `json:"limitPrice"`
 	AvgPrice   utils.UnixTime   `json:"avgPrice"`
-	FilledQty  float64          `json:"filledQty"`
+	FilledQty  string           `json:"filledQty"`
 	Operations []Operations     `json:"executions"`
 }
 
@@ -74,17 +76,32 @@ func (s *TradingService) PlaceOrder(ctx context.Context, accountID AccountID, in
 	if err != nil {
 		return "", nil, err
 	}
+
 	var order placeOrderResponse
 	resp, err := s.client.do(req, &order)
 	if err != nil {
 		return "", nil, err
 	}
+
 	return order.OrderID, resp, nil
 }
 
 // CancelOrder cancels an order by OrderID for AccountID and InstrumentSymbol
 func (s *TradingService) CancelOrder(ctx context.Context, id AccountID, symbol InstrumentSymbol, orderID OrderID, opts ...RequestOpt) (bool, *http.Response, error) {
-	panic("not implemented")
+
+	p := fmt.Sprintf("/accounts/%s/%s/orders/%s", id, symbol, orderID)
+	req, err := s.client.newRequest(ctx, http.MethodDelete, p, nil, opts)
+	if err != nil {
+		return false, nil, err
+	}
+
+	var order placeOrderResponse
+	resp, err := s.client.do(req, &order)
+	if err != nil {
+		return false, nil, err
+	}
+
+	return true, resp, nil
 }
 
 // GetOrder fetches an order by OrderID for AccountID and InstrumentSymbol

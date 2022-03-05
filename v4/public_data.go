@@ -38,8 +38,8 @@ func (s *PublicDataService) normalizeInstrumentSymbols(symbols []string) ([]stri
 
 // Orderbook represents an orderbook
 type Orderbook struct {
-	Asks [][]float64    `json:"asks"`
-	Bids [][]float64    `json:"bids"`
+	Asks [][]string     `json:"asks"`
+	Bids [][]string     `json:"bids"`
 	Ts   utils.UnixTime `json:"timestamp"`
 }
 
@@ -47,6 +47,7 @@ type Orderbook struct {
 // InstrumentSymbol is an instrument symbol with format BASE-QUOTE
 type OrderbookParams struct {
 	Symbol InstrumentSymbol `url:"-"`
+	Limit  int64            `url:"limit"`
 }
 
 // GetOrderbook fetches an orderbook given an instrument symbol
@@ -111,8 +112,8 @@ type Trade struct {
 	Tid    int64          `json:"tid"`
 	Ts     utils.UnixTime `json:"date"`
 	Type   string         `json:"type"`
-	Price  float64        `json:"price"`
-	Amount float64        `json:"amount"`
+	Price  string         `json:"price"`
+	Amount string         `json:"amount"`
 }
 
 // TradeParams represents a ListTrades request param

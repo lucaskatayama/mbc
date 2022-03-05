@@ -17,41 +17,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPublicDataService_GetOrderbook(t *testing.T) {
-	assert := assert.New(t)
-
-	mux, server, client := setupPublicOnly(t)
-	defer teardown(server)
-
-	mux.HandleFunc("/api/v4/BTC-BRL/orderbook",
-		func(w http.ResponseWriter, r *http.Request) {
-			testMethod(t, r, http.MethodGet)
-			w.WriteHeader(http.StatusOK)
-			data := mbc.Orderbook{
-				Asks: [][]float64{
-					{0.1, 100},
-				},
-				Bids: [][]float64{
-					{0.05, 100},
-				},
-			}
-			resp, _ := json.Marshal(data)
-			_, _ = w.Write(resp)
-		},
-	)
-
-	got, resp, err := client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: "BTC-BRL"})
-	if err != nil {
-		t.Fatalf("PublicData.GetOrderbook returned error: %v", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("respnse is not OK/200: %d", resp.StatusCode)
-	}
-	assert.NotNil(got.Asks, "asks should not be nil")
-	assert.NotNil(got.Bids, "bids should not be nil")
-}
-
 func TestPublicDataService_GetTickers(t *testing.T) {
 	assert := assert.New(t)
 
@@ -112,8 +77,8 @@ func TestPublicDataService_GetTrades(t *testing.T) {
 					Tid:    int64(i),
 					Ts:     utils.UnixTime(time.Now()),
 					Type:   "buy",
-					Price:  10,
-					Amount: 10,
+					Price:  "10",
+					Amount: "10",
 				})
 			}
 			resp, _ := json.Marshal(data)
@@ -152,22 +117,6 @@ func TestName(t *testing.T) {
 	fmt.Println(o)
 }
 
-func Test_getOrderbook(t *testing.T) {
-	client, err := mbc.NewPublicOnlyClient()
-	if err != nil {
-		panic(err)
-	}
-	o, resp, err := client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTC_BRL})
-	if err != nil {
-		panic(err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		panic("not ok")
-	}
-	fmt.Println(o)
-}
-
 func ExampleNewClient() {
 	client, err := mbc.NewClient("id", "secret")
 	if err != nil {
@@ -182,7 +131,7 @@ func ExampleNewPublicOnlyClient() {
 	if err != nil {
 		panic(err)
 	}
-	client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{mbc.BTC_BRL})
+	client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTCBRL})
 }
 
 func ExampleNewPublicOnlyClient_getOrderbook() {
@@ -190,7 +139,7 @@ func ExampleNewPublicOnlyClient_getOrderbook() {
 	if err != nil {
 		panic(err)
 	}
-	o, resp, err := client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTC_BRL})
+	o, resp, err := client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTCBRL})
 	if err != nil {
 		panic(err)
 	}
@@ -206,7 +155,7 @@ func ExampleNewPublicOnlyClient_listTickers() {
 	if err != nil {
 		panic(err)
 	}
-	o, resp, err := client.PublicData.ListTickers(context.Background(), mbc.TickerParams{Symbols: []mbc.InstrumentSymbol{mbc.BTC_BRL}})
+	o, resp, err := client.PublicData.ListTickers(context.Background(), mbc.TickerParams{Symbols: []mbc.InstrumentSymbol{mbc.BTCBRL}})
 	if err != nil {
 		panic(err)
 	}
@@ -222,7 +171,7 @@ func ExampleNewPublicOnlyClient_listTrades() {
 	if err != nil {
 		panic(err)
 	}
-	o, resp, err := client.PublicData.ListTrades(context.Background(), mbc.TradeParams{Symbol: mbc.BTC_BRL})
+	o, resp, err := client.PublicData.ListTrades(context.Background(), mbc.TradeParams{Symbol: mbc.BTCBRL})
 	if err != nil {
 		panic(err)
 	}
@@ -238,5 +187,5 @@ func ExampleNewPublicOnlyClient_withLogrusLogger() {
 	log.SetLevel(logrus.FatalLevel)
 	client, _ := mbc.NewPublicOnlyClient(mbc.WithLogger(log))
 
-	client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTC_BRL})
+	client.PublicData.GetOrderbook(context.Background(), mbc.OrderbookParams{Symbol: mbc.BTCBRL})
 }

@@ -2,10 +2,12 @@ package mbc_test
 
 import (
 	"context"
-	"github.com/lucaskatayama/mbc/v4"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/lucaskatayama/mbc/v4"
 )
 
 func TestTradingService_PlaceOrder(t *testing.T) {
@@ -26,12 +28,9 @@ func TestTradingService_PlaceOrder(t *testing.T) {
 		},
 	)
 
-	got, resp, err := client.Trading.PlaceOrder(context.Background(), "1", mbc.LTC_BRL, mbc.OrderRequest{
-		Type:       mbc.Market,
-		Side:       mbc.Buy,
-		Cost:       0,
-		LimitPrice: 0,
-		Qty:        0,
+	got, resp, err := client.Trading.PlaceOrder(context.Background(), "1", mbc.LTCBRL, mbc.OrderRequest{
+		Type: mbc.Market,
+		Side: mbc.Buy,
 	})
 	if err != nil {
 		t.Fatalf("Trading.PlaceOrder returned error: %v", err)

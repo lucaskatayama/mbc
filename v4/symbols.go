@@ -10,8 +10,8 @@ import (
 type InstrumentSymbol string
 
 const (
-	BTC_BRL InstrumentSymbol = "BTC-BRL"
-	LTC_BRL InstrumentSymbol = "LTC-BRL"
+	BTCBRL InstrumentSymbol = "BTC-BRL"
+	LTCBRL InstrumentSymbol = "LTC-BRL"
 )
 
 func (i InstrumentSymbol) String() string {

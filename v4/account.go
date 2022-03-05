@@ -41,9 +41,9 @@ func (s *AccountService) ListAccounts(ctx context.Context, opts ...RequestOpt) (
 
 // AccountBalance represents an asset balance for account
 type AccountBalance struct {
-	Available float64     `json:"available"`
+	Available string      `json:"available"`
 	Symbol    AssetSymbol `json:"symbol"`
-	Total     float64     `json:"total"`
+	Total     string      `json:"total"`
 }
 
 // ListBalances fecthes balances for each asset for an AccountID
