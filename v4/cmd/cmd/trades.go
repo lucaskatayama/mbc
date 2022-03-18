@@ -29,7 +29,7 @@ func (tp TradesPrintable) ToTable() string {
 	t.AppendHeader(table.Row{"Datetime", "Id", "Side", "Price", "Volume"})
 
 	for i := len(tp.trades) - 1; i >= 0; i-- {
-		if int64(len(tp.trades)-i) > limit {
+		if limit > 0 && int64(len(tp.trades)-i) > limit {
 			break
 		}
 		trade := tp.trades[i]
@@ -80,7 +80,7 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	tradesCmd.Flags().Int64VarP(&limit, "limit", "l", 1, "Size limit")
+	tradesCmd.Flags().Int64VarP(&limit, "limit", "l", -1, "Size limit")
 	tradesCmd.Flags().Int64Var(&tid, "tid", 0, "From tid")
 	tradesCmd.Flags().Int64Var(&from, "from", 0, "From unix time")
 	tradesCmd.Flags().Int64Var(&to, "to", 0, "To unix time")
