@@ -128,7 +128,6 @@ func (c *Client) newRequest(ctx context.Context, method string, path string, bod
 
 	// Create a request specific headers map.
 	reqHeaders := make(http.Header)
-	reqHeaders.Set("Accept", "application/vnd.api.v4.2.0+json")
 
 	if c.userAgent != "" {
 		reqHeaders.Set("User-Agent", c.userAgent)

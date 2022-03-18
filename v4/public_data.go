@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/lucaskatayama/mbc/v4/utils"
 )
 
@@ -38,9 +40,9 @@ func (s *PublicDataService) normalizeInstrumentSymbols(symbols []string) ([]stri
 
 // Orderbook represents an orderbook
 type Orderbook struct {
-	Asks [][]string     `json:"asks"`
-	Bids [][]string     `json:"bids"`
-	Ts   utils.UnixTime `json:"timestamp"`
+	Asks [][]decimal.Decimal `json:"asks"`
+	Bids [][]decimal.Decimal `json:"bids"`
+	Ts   utils.UnixTime      `json:"timestamp"`
 }
 
 // OrderbookParams represents an orderbook request param
