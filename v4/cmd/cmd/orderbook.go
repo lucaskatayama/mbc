@@ -16,7 +16,6 @@ import (
 )
 
 var limit int64
-var instrument string
 
 type OrderbookPrintable struct {
 	mbc.Orderbook
@@ -29,9 +28,11 @@ func (o OrderbookPrintable) ToJSON() string {
 
 func (o OrderbookPrintable) ToTable() string {
 	t := table.NewWriter()
+	t.SetStyle(table.StyleLight)
 	t.AppendHeader(table.Row{"#", "Price", "Volume"})
 	bestAsk := o.Asks[len(o.Asks)-1]
 	bestBid := o.Bids[0]
+	spread := bestAsk[0].Sub(bestBid[0])
 
 	var asks []table.Row
 	for i := len(o.Asks) - 1; i >= 0; i-- {
@@ -41,8 +42,8 @@ func (o OrderbookPrintable) ToTable() string {
 
 	t.AppendSeparator()
 	t.AppendRow(table.Row{
-		"Spread", bestAsk[0].Sub(bestBid[0]), bestAsk[1].Sub(bestBid[1]),
-	})
+		"Spread", spread, spread,
+	}, table.RowConfig{AutoMerge: true})
 	t.AppendSeparator()
 
 	var bids []table.Row
@@ -94,5 +95,4 @@ func init() {
 	// is called directly, e.g.:
 	orderbookCmd.Flags().Int64VarP(&limit, "limit", "l", 10, "Orderbook size limit")
 
-	orderbookCmd.Flags().StringVarP(&instrument, "instrument", "i", "", "Instrument symbol in the format BASE-QUOTE (e.g. BTC-BRL)")
 }
