@@ -9,7 +9,7 @@
 ![Last Commit](https://img.shields.io/github/last-commit/lucaskatayama/mbc)
 ![Latest Release](https://img.shields.io/github/v/release/lucaskatayama/mbc)
 ![Test](https://img.shields.io/github/workflow/status/lucaskatayama/mbc/Go?label=test)
-[![Go Report Card](https://goreportcard.com/badge/lucaskatayama/mbc/v4?cacheSeconds=1800)](https://goreportcard.com/report/lucaskatayama/mbc/v4)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lucaskatayama/mbc/v4?cacheSeconds=1800)](https://goreportcard.com/report/github.com/lucaskatayama/mbc/v4)
 ![license](https://img.shields.io/github/license/lucaskatayama/mbc)
   
   
